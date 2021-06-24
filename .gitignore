@@ -11,8 +11,6 @@ _Publish/
 *.suo
 *.user
 *.userosscache
-*.sln.docstates
-*.sln
 .editorconfig
 GlobalSuppressions.cs
 

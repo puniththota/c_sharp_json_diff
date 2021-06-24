@@ -30,5 +30,5 @@ jobs:
     - name: Upload package
       uses: actions/upload-artifact@v2
       with:
-        name: NuGet Package
+        name: c_sharp_json_diff
         path: c_sharp_json_diff/bin/Release/*.nupkg

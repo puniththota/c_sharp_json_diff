@@ -24,12 +24,12 @@ namespace Test
             expectedDiff.previous = 1;
             expectedDiff.current = 2;
             expectedDiff.difference = 1;
-            expected.Diff.Add(expectedDiff);
+            expected.Diffs.Add(expectedDiff);
             Result actual = JsonDiff.GetDiff(first, second);
-            Assert.AreEqual(expected.Diff.Count, actual.Diff.Count);
-            Assert.AreEqual(expected.Diff[0].previous, actual.Diff[0].previous);
-            Assert.AreEqual(expected.Diff[0].current, actual.Diff[0].current);
-            Assert.AreEqual(expected.Diff[0].difference, actual.Diff[0].difference);
+            Assert.AreEqual(expected.Diffs.Count, actual.Diffs.Count);
+            Assert.AreEqual(expected.Diffs[0].previous, actual.Diffs[0].previous);
+            Assert.AreEqual(expected.Diffs[0].current, actual.Diffs[0].current);
+            Assert.AreEqual(expected.Diffs[0].difference, actual.Diffs[0].difference);
         }
     }
 }

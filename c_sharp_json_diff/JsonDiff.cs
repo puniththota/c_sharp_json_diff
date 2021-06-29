@@ -1,16 +1,21 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace c_sharp_json_diff
 {
     public class Result {
-        public List<Diff> Diff { get; set; } = new List<Diff>();
+        public List<Diff> Diffs { get; set; } = new List<Diff>();
+
     }
     public class Diff
     {
+        [JsonProperty("previous")]
         public double previous { get; set; }
+        [JsonProperty("current")]
         public double current { get; set; }
+        [JsonProperty("difference")]
         public double difference { get; set; }
     }
     public class JsonDiff
@@ -38,7 +43,7 @@ namespace c_sharp_json_diff
                     item.previous = firstValue;
                     item.current = secondValue;
                     item.difference = Math.Abs(firstValue - secondValue);
-                    result.Diff.Add(item);
+                    result.Diffs.Add(item);
                 }
             }
             return result;

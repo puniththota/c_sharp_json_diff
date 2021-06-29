@@ -11,6 +11,8 @@ namespace c_sharp_json_diff
     }
     public class Diff
     {
+        [JsonProperty("property")]
+        public string jsonProperty { get; set; } = "";
         [JsonProperty("previous")]
         public double previous { get; set; }
         [JsonProperty("current")]
@@ -40,6 +42,7 @@ namespace c_sharp_json_diff
                 if(firstValue != secondValue)
                 {
                     Diff item = new Diff();
+                    item.jsonProperty = key;
                     item.previous = firstValue;
                     item.current = secondValue;
                     item.difference = Math.Abs(firstValue - secondValue);

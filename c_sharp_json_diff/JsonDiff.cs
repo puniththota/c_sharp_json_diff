@@ -12,40 +12,52 @@ namespace c_sharp_json_diff
         public static JObject NumericDiff(string left, string right)
         {
             string diff = JsonDiffBetweenTwo(left, right);
-            JObject diffJsonObject = JObject.Parse(diff);
-            foreach(KeyValuePair<string, JToken?> prop in diffJsonObject)
+            if(diff == null)
             {
-                if(prop.Value != null)
+                return JObject.Parse(@"{}");
+            }
+            JObject diffJsonObject = JObject.Parse(diff);
+            JObject diffReturnObject = CalculateNumericDiff(diffJsonObject);
+            return diffReturnObject;
+        }
+
+        private static JObject CalculateNumericDiff(JObject jObject)
+        {
+            foreach (KeyValuePair<string, JToken?> prop in jObject)
+            {
+                if (prop.Value != null)
                 {
-                    JArray valuesAsArray = (JArray)prop.Value;
-                    if (valuesAsArray[0] != null && valuesAsArray[1] != null)
+                    if (!(prop.Value is JArray))
                     {
-                        string leftValueAsString = valuesAsArray[0].ToString();
-                        string rightValueAsString = valuesAsArray[1].ToString();
-                        if (int.TryParse(leftValueAsString, out int leftValueAsInt) && int.TryParse(rightValueAsString, out int rightValueAsInt))
+                        CalculateNumericDiff((JObject)prop.Value);
+                    }
+                    else
+                    {
+                        JArray valuesAsArray = (JArray)prop.Value;
+                        if (valuesAsArray[0] != null && valuesAsArray[1] != null)
                         {
-                            int diffValue = Math.Abs(leftValueAsInt - rightValueAsInt);
-                            valuesAsArray.Add(diffValue);
-                        }
-                        else if (float.TryParse(leftValueAsString, out float leftValueAsFloat) && float.TryParse(rightValueAsString, out float rightValueAsFloat))
-                        {
-                            float diffValue = Math.Abs(leftValueAsFloat - rightValueAsFloat);
-                            valuesAsArray.Add(diffValue);
-                        }
-                        else if (double.TryParse(leftValueAsString, out double leftValueAsDouble) && double.TryParse(rightValueAsString, out double rightValueAsDouble))
-                        {
-                            double diffValue = Math.Abs(leftValueAsDouble - rightValueAsDouble);
-                            valuesAsArray.Add(diffValue);
-                        }
-                        else
-                        {
-                            prop.Value.Remove();
+                            string leftValueAsString = valuesAsArray[0].ToString();
+                            string rightValueAsString = valuesAsArray[1].ToString();
+                            if (int.TryParse(leftValueAsString, out int leftValueAsInt) && int.TryParse(rightValueAsString, out int rightValueAsInt))
+                            {
+                                int diffValue = Math.Abs(leftValueAsInt - rightValueAsInt);
+                                valuesAsArray.Add(diffValue);
+                            }
+                            else if (float.TryParse(leftValueAsString, out float leftValueAsFloat) && float.TryParse(rightValueAsString, out float rightValueAsFloat))
+                            {
+                                float diffValue = Math.Abs(leftValueAsFloat - rightValueAsFloat);
+                                valuesAsArray.Add(diffValue);
+                            }
+                            else if (double.TryParse(leftValueAsString, out double leftValueAsDouble) && double.TryParse(rightValueAsString, out double rightValueAsDouble))
+                            {
+                                double diffValue = Math.Abs(leftValueAsDouble - rightValueAsDouble);
+                                valuesAsArray.Add(diffValue);
+                            }
                         }
                     }
                 }
             }
-            string result = diffJsonObject.ToString(Formatting.Indented);
-            return diffJsonObject;
+            return jObject;
         }
 
         public static string NumericDiffAsString(string left, string right)

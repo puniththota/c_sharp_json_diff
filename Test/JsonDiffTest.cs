@@ -15,23 +15,40 @@ namespace Test
 
         [Test, Category("Unit")]
         [TestCaseSource("ProviderForNumericDiffTest")]
-        public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedResultReturned(string left, string right, string expected)
+        public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedNumberOfChildrenReturned(string left, string right, string expected)
         {
-            JObject actualNumericDiff = JsonDiff.NumericDiff(left, right);
+            JsonDiff jsonDiff = new JsonDiff(left, right);
+            JObject actualNumericDiff = jsonDiff.NumericDiff(true);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             Assert.AreEqual(expectedNumericDiff.Count, actualNumericDiff.Count);
+        }
+
+        [Test, Category("Unit")]
+        [TestCaseSource("ProviderForNumericDiffTest")]
+        public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedNumberOfPropertiesReturned(string left, string right, string expected)
+        {
+            JsonDiff jsonDiff = new JsonDiff(left, right);
+            JObject actualNumericDiff = jsonDiff.NumericDiff(true);
+            JObject expectedNumericDiff = JObject.Parse(expected);
 
             IEnumerable<JProperty> actualProperties = actualNumericDiff.Properties();
             IEnumerable<JProperty> expectedProperties = expectedNumericDiff.Properties();
+
             Assert.AreEqual(expectedProperties, actualProperties);
 
-            if (expectedNumericDiff.ContainsKey("number") && actualNumericDiff.ContainsKey("number"))
-            {
-                JArray expectedArray = (JArray)expectedNumericDiff.Value<JToken>("number");
-                JArray actualArray = (JArray)actualNumericDiff.Value<JToken>("number");
-                Assert.AreEqual(expectedArray[2], actualArray[2]);
-            }
+        }
+
+        [Test, Category("Unit")]
+        [TestCaseSource("ProviderForNumericDiffTest")]
+        public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedValueReturned(string left, string right, string expected)
+        {
+            JsonDiff jsonDiff = new JsonDiff(left, right);
+            JObject actualNumericDiff = jsonDiff.NumericDiff(true);
+            JObject expectedNumericDiff = JObject.Parse(expected);
+
+            Assert.IsTrue(JObject.DeepEquals(expectedNumericDiff, actualNumericDiff));
+
         }
 
         public static IEnumerable<object[]> ProviderForNumericDiffTest()
@@ -39,50 +56,65 @@ namespace Test
             return new List<object[]>()
             {
                 new object[] { @"{
-                              'number': 10,
-                              'sommething': 20
-                             }", @"{
-                              'number': 5,
-                              'sommething': 10
-                             }", @"{
-                              'number': [
-                                 10,
-                                  5,
-                                  5
-                                 ],
-                             'something': [
-                                 20,
-                                 10,
-                                 10
-                                 ]
-                                }" },
+                              'a': [
+                                    { 'b': 15 },
+                                    { 'c': 25 },
+                                   ]
+                                  }",
+                               @"{
+                               'a': [
+                                     { 'b': 10 },
+                                     { 'c': 20 },
+                                    ]
+                                 }", 
+                               @"{
+                               'a': {
+                                    '_t': 'a',
+                                     '0': {
+                                           'b': [{
+                                                   'left': 15,
+                                                   'right': 10,
+                                                    'diff': 5
+                                                }]
+                                                },
+                                    '1': {
+                                          'c': [{
+                                                   'left': 25,
+                                                   'right': 20,
+                                                    'diff': 5
+                                               }]
+                                           }
+                                        }
+                                       }" },
                 new object[]
                 { @"{
                               'number': 10,
-                              'sommething': {
+                              'something': {
                                'inside': 20
                                 }
                              }", @"{
                               'number': 5,
-                              'sommething': {
+                              'something': {
                                'inside': 10
                                 }
                              }", @"{
                                  'number': [
-                                    10,
-                                     5,
-                                     5
-                                    ],
-                                'sommething': {
-                                   'inside': [
-                                      20,
-                                      10,
-                                      10
-                                       ]
-                                    }
-                                   }"
-
-                },
+                                  {
+                                   'left': 10,
+                                   'right': 5,
+                                   'diff': 5
+                                  }
+                                 ],
+                                 'something': {
+                                    'inside': [
+                                       {
+                                         'left': 20,
+                                         'right': 10,
+                                         'diff': 10
+                                        }
+                                        ]
+                                       }
+                                      }"},
                 new object[]
                 {
                     @"{
@@ -97,19 +129,19 @@ namespace Test
                 {
                     @"{
                               'number': 10,
-                              'sommething': 20
+                              'something': 20
                              }", @"{
                               'number': 5,
-                              'sommething': {
+                              'something': {
                                'inside': 10
                                 }
                              }", @"{
-                                 'number': [
-                                    10,
-                                     5,
-                                     5
-                                    ],
-                                'sommething': [
+                                 'number': [{
+                                   'left': 10,
+                                    'right': 5,
+                                     'diff': 5
+                                    }],
+                                'something': [
                                       20,
                                       {'inside': 10}
                              ]}"

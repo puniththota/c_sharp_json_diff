@@ -17,8 +17,8 @@ namespace Test
         [TestCaseSource("ProviderForNumericDiffTest")]
         public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedNumberOfChildrenReturned(string left, string right, string expected)
         {
-            JsonDiff jsonDiff = new JsonDiff(left, right);
-            JObject actualNumericDiff = jsonDiff.NumericDiff(true);
+            JsonDiff jsonDiff = new JsonDiff();
+            JObject actualNumericDiff = jsonDiff.NumericDiff(left, right);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             Assert.AreEqual(expectedNumericDiff.Count, actualNumericDiff.Count);
@@ -28,8 +28,8 @@ namespace Test
         [TestCaseSource("ProviderForNumericDiffTest")]
         public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedNumberOfPropertiesReturned(string left, string right, string expected)
         {
-            JsonDiff jsonDiff = new JsonDiff(left, right);
-            JObject actualNumericDiff = jsonDiff.NumericDiff(true);
+            JsonDiff jsonDiff = new JsonDiff();
+            JObject actualNumericDiff = jsonDiff.NumericDiff(left, right);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             IEnumerable<JProperty> actualProperties = actualNumericDiff.Properties();
@@ -43,8 +43,8 @@ namespace Test
         [TestCaseSource("ProviderForNumericDiffTest")]
         public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedValueReturned(string left, string right, string expected)
         {
-            JsonDiff jsonDiff = new JsonDiff(left, right);
-            JObject actualNumericDiff = jsonDiff.NumericDiff(true);
+            JsonDiff jsonDiff = new JsonDiff();
+            JObject actualNumericDiff = jsonDiff.NumericDiff(left, right);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             Assert.IsTrue(JObject.DeepEquals(expectedNumericDiff, actualNumericDiff));

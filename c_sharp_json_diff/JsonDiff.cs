@@ -1,55 +1,137 @@
-﻿using Newtonsoft.Json;
+﻿using JsonDiffPatchDotNet;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace c_sharp_json_diff
 {
-    public class Result {
-        public List<Diff> Diffs { get; set; } = new List<Diff>();
-
-    }
-    public class Diff
-    {
-        [JsonProperty("property")]
-        public string jsonProperty { get; set; } = "";
-        [JsonProperty("previous")]
-        public double previous { get; set; }
-        [JsonProperty("current")]
-        public double current { get; set; }
-        [JsonProperty("difference")]
-        public double difference { get; set; }
-    }
     public class JsonDiff
     {
-        public static Result GetDiff(IDictionary<string, double> first, IDictionary<string, double> second)
+        private bool _isAbsoluteDiff;
+        private bool _isDiffIndented;
+        private const string skippableProperty = "_t";
+        private const string propertyLeft = "left";
+        private const string propertyRight = "right";
+        private const string propertyDiff = "diff";
+
+        public JsonDiff(bool isAbsoluteDiff, bool isDiffIndented)
         {
-           ICollection<String> firstKeys = first.Keys;
-            ICollection<String> secondKeys = second.Keys;
-            List<String> matches = new List<string>();
-            Result result = new Result();
-            foreach (string key in secondKeys)
+            _isAbsoluteDiff = isAbsoluteDiff;
+            _isDiffIndented = isDiffIndented;
+        }
+
+        public JsonDiff()
+        {
+            _isAbsoluteDiff = true;
+            _isDiffIndented = true;
+        }
+
+        /// <summary>
+        /// Method do a numeric diff between two Json strings. Method throws a custom JsonDiffFailedException in case of any exception
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns name="diffReturnObject">Returns a numeric diff object of type JObject</returns>
+        public JObject NumericDiff(string left, string right)
+        {
+            string diff = "";
+            try
             {
-                if (firstKeys.Contains(key))
+                diff = JsonDiffBetweenTwo(left, right);
+                if (diff == null)
                 {
-                    matches.Add(key);
+                    return JObject.Parse(@"{}");
+                }
+                JObject diffJsonObject = JObject.Parse(diff);
+                JObject diffReturnObject = CalculateNumericDiff(diffJsonObject, _isAbsoluteDiff);
+                return diffReturnObject;
+            }
+            catch (Exception e)
+            {
+                throw new JsonDiffFailedException("Exception encountered while performing json numeric diff", e);
+            }
+        }
+
+        /// <summary>
+        /// Method do a numeric diff between two Json strings. Method throws a custom JsonDiffFailedException in case of any exception
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns>Returns a numeric diff string between left and right</returns>
+        public string NumericDiffAsString(string left, string right)
+        {
+            JObject diff = NumericDiff(left, right);
+            return _isDiffIndented ? diff.ToString(Formatting.Indented) : diff.ToString();
+
+        }
+
+        private JObject CalculateNumericDiff(JObject jObject, bool isAbsoluteDiff)
+        {
+            foreach (KeyValuePair<string, JToken?> prop in jObject)
+            {
+                if (ShouldSkipProperty(prop.Key))
+                {
+                    continue;
+                }
+                if (prop.Value != null)
+                {
+                    if (prop.Value is JArray valuesAsArray)
+                    {
+                        if (valuesAsArray.Count >= 2)
+                        {
+                            if (valuesAsArray[0] != null && valuesAsArray[1] != null)
+                            {
+                                string leftValueAsString = valuesAsArray[0].ToString();
+                                string rightValueAsString = valuesAsArray[1].ToString();
+                                if (int.TryParse(leftValueAsString, out int leftValueAsInt) && int.TryParse(rightValueAsString, out int rightValueAsInt))
+                                {
+                                    int diffValue = isAbsoluteDiff ? Math.Abs(leftValueAsInt - rightValueAsInt) : leftValueAsInt - rightValueAsInt;
+                                    var map = CreateDictionary(leftValueAsInt, rightValueAsInt, diffValue);
+                                    JToken jToken = JToken.FromObject(map);
+                                    prop.Value.Replace(jToken);
+                                }
+                                else if (float.TryParse(leftValueAsString, out float leftValueAsFloat) && float.TryParse(rightValueAsString, out float rightValueAsFloat))
+                                {
+                                    float diffValue = isAbsoluteDiff ? Math.Abs(leftValueAsFloat - rightValueAsFloat) : leftValueAsFloat - rightValueAsFloat;
+                                    var map = CreateDictionary(leftValueAsFloat, rightValueAsFloat, diffValue);
+                                    JToken jToken = JToken.FromObject(map);
+                                    prop.Value.Replace(jToken);
+                                }
+
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (prop.Value is JObject jsonObject)
+                        {
+                            CalculateNumericDiff(jsonObject, isAbsoluteDiff);
+                        }
+                    }
                 }
             }
-            foreach(string key in matches)
-            {
-                first.TryGetValue(key, out double firstValue);
-                second.TryGetValue(key, out double secondValue);
-                if(firstValue != secondValue)
-                {
-                    Diff item = new Diff();
-                    item.jsonProperty = key;
-                    item.previous = firstValue;
-                    item.current = secondValue;
-                    item.difference = Math.Abs(firstValue - secondValue);
-                    result.Diffs.Add(item);
-                }
-            }
-            return result;
+            return jObject;
+        }
+
+        private string JsonDiffBetweenTwo(string left, string right)
+        {
+            return new JsonDiffPatch(new Options { ArrayDiff = ArrayDiffMode.Efficient }).Diff(left, right);
+        }
+
+        private Dictionary<object, object> CreateDictionary(object left, object right, object diff)
+        {
+            Dictionary<object, object> map = new Dictionary<object, object>();
+            map.Add(propertyLeft, left);
+            map.Add(propertyRight, right);
+            map.Add(propertyDiff, diff);
+            return map;
+        }
+
+        private bool ShouldSkipProperty(string property)
+        {
+            return property == skippableProperty;
         }
     }
 }

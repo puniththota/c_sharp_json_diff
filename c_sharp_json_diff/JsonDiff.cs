@@ -11,6 +11,10 @@ namespace c_sharp_json_diff
     {
         private bool _isAbsoluteDiff;
         private bool _isDiffIndented;
+        private const string skippableProperty = "_t";
+        private const string propertyLeft = "left";
+        private const string propertyRight = "right";
+        private const string propertyDiff = "diff";
 
         public JsonDiff(bool isAbsoluteDiff, bool isDiffIndented)
         {
@@ -24,6 +28,12 @@ namespace c_sharp_json_diff
             _isDiffIndented = true;
         }
 
+        /// <summary>
+        /// Method do a numeric diff between two Json strings. Method throws a custom JsonDiffFailedException in case of any exception
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns name="diffReturnObject">Returns a numeric diff object of type JObject</returns>
         public JObject NumericDiff(string left, string right)
         {
             string diff = "";
@@ -40,10 +50,16 @@ namespace c_sharp_json_diff
             }
             catch (Exception e)
             {
-                return JObject.Parse(diff + e.StackTrace);
+                throw new JsonDiffFailedException("Exception encountered while performing json numeric diff", e);
             }
         }
 
+        /// <summary>
+        /// Method do a numeric diff between two Json strings. Method throws a custom JsonDiffFailedException in case of any exception
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns>Returns a numeric diff string between left and right</returns>
         public string NumericDiffAsString(string left, string right)
         {
             JObject diff = NumericDiff(left, right);
@@ -55,15 +71,14 @@ namespace c_sharp_json_diff
         {
             foreach (KeyValuePair<string, JToken?> prop in jObject)
             {
-                if (prop.Key == "_t")
+                if (ShouldSkipProperty(prop.Key))
                 {
                     continue;
                 }
                 if (prop.Value != null)
                 {
-                    if (prop.Value is JArray)
+                    if (prop.Value is JArray valuesAsArray)
                     {
-                        JArray valuesAsArray = (JArray)prop.Value;
                         if (valuesAsArray.Count >= 2)
                         {
                             if (valuesAsArray[0] != null && valuesAsArray[1] != null)
@@ -73,16 +88,16 @@ namespace c_sharp_json_diff
                                 if (int.TryParse(leftValueAsString, out int leftValueAsInt) && int.TryParse(rightValueAsString, out int rightValueAsInt))
                                 {
                                     int diffValue = isAbsoluteDiff ? Math.Abs(leftValueAsInt - rightValueAsInt) : leftValueAsInt - rightValueAsInt;
-                                    Dictionary<string, int> map = CreateDictionary<string, int>("left", "right", "diff", leftValueAsInt, rightValueAsInt, diffValue);
-                                    valuesAsArray.RemoveAll();
-                                    valuesAsArray.Add(JToken.FromObject(map));
+                                    var map = CreateDictionary(leftValueAsInt, rightValueAsInt, diffValue);
+                                    JToken jToken = JToken.FromObject(map);
+                                    prop.Value.Replace(jToken);
                                 }
                                 else if (float.TryParse(leftValueAsString, out float leftValueAsFloat) && float.TryParse(rightValueAsString, out float rightValueAsFloat))
                                 {
                                     float diffValue = isAbsoluteDiff ? Math.Abs(leftValueAsFloat - rightValueAsFloat) : leftValueAsFloat - rightValueAsFloat;
-                                    Dictionary<string, float> map = CreateDictionary<string, float>("left", "right", "diff", leftValueAsFloat, rightValueAsFloat, diffValue);
-                                    valuesAsArray.RemoveAll();
-                                    valuesAsArray.Add(JToken.FromObject(map));
+                                    var map = CreateDictionary(leftValueAsFloat, rightValueAsFloat, diffValue);
+                                    JToken jToken = JToken.FromObject(map);
+                                    prop.Value.Replace(jToken);
                                 }
 
                             }
@@ -105,13 +120,18 @@ namespace c_sharp_json_diff
             return new JsonDiffPatch(new Options { ArrayDiff = ArrayDiffMode.Efficient }).Diff(left, right);
         }
 
-        private Dictionary<TKey, TValue> CreateDictionary<TKey, TValue>(TKey leftKey, TKey rightKey, TKey diffKey, TValue left, TValue right, TValue diff)
+        private Dictionary<object, object> CreateDictionary(object left, object right, object diff)
         {
-            Dictionary<TKey, TValue> map = new Dictionary<TKey, TValue>();
-            map.Add(leftKey, left);
-            map.Add(rightKey, right);
-            map.Add(diffKey, diff);
+            Dictionary<object, object> map = new Dictionary<object, object>();
+            map.Add(propertyLeft, left);
+            map.Add(propertyRight, right);
+            map.Add(propertyDiff, diff);
             return map;
+        }
+
+        private bool ShouldSkipProperty(string property)
+        {
+            return property == skippableProperty;
         }
     }
 }

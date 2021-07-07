@@ -71,18 +71,18 @@ namespace Test
                                'a': {
                                     '_t': 'a',
                                      '0': {
-                                           'b': [{
+                                           'b': {
                                                    'left': 15,
                                                    'right': 10,
                                                     'diff': 5
-                                                }]
+                                                }
                                                 },
                                     '1': {
-                                          'c': [{
+                                          'c': {
                                                    'left': 25,
                                                    'right': 20,
                                                     'diff': 5
-                                               }]
+                                               }
                                            }
                                         }
                                        }" },
@@ -98,21 +98,18 @@ namespace Test
                                'inside': 10
                                 }
                              }", @"{
-                                 'number': [
-                                  {
+                                 'number': {
                                    'left': 10,
                                    'right': 5,
                                    'diff': 5
-                                  }
-                                 ],
+                                  },
                                  'something': {
-                                    'inside': [
+                                    'inside': 
                                        {
                                          'left': 20,
                                          'right': 10,
                                          'diff': 10
-                                        }
-                                        ]
+                                        }   
                                        }
                                       }"},
                 new object[]
@@ -136,12 +133,12 @@ namespace Test
                                'inside': 10
                                 }
                              }", @"{
-                                 'number': [{
+                                 'number': {
                                    'left': 10,
                                     'right': 5,
                                      'diff': 5
-                                    }],
-                                'something': [
+                                    },
+                                'something': [ 
                                       20,
                                       {'inside': 10}
                              ]}"

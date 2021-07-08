@@ -92,10 +92,10 @@ namespace c_sharp_json_diff
                                     JToken jToken = JToken.FromObject(map);
                                     prop.Value.Replace(jToken);
                                 }
-                                else if (float.TryParse(leftValueAsString, out float leftValueAsFloat) && float.TryParse(rightValueAsString, out float rightValueAsFloat))
+                                else if (double.TryParse(leftValueAsString, out double leftValueAsDouble) && double.TryParse(rightValueAsString, out double rightValueAsDouble))
                                 {
-                                    float diffValue = isAbsoluteDiff ? Math.Abs(leftValueAsFloat - rightValueAsFloat) : leftValueAsFloat - rightValueAsFloat;
-                                    var map = CreateDictionary(leftValueAsFloat, rightValueAsFloat, diffValue);
+                                    double diffValue = isAbsoluteDiff ? Math.Abs(leftValueAsDouble - rightValueAsDouble) : leftValueAsDouble - rightValueAsDouble;
+                                    var map = CreateDictionary(leftValueAsDouble, rightValueAsDouble, diffValue);
                                     JToken jToken = JToken.FromObject(map);
                                     prop.Value.Replace(jToken);
                                 }

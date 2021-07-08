@@ -125,18 +125,18 @@ namespace Test
                 new object[]
                 {
                     @"{
-                              'number': 10,
+                              'number': 102679.894,
                               'something': 20
                              }", @"{
-                              'number': 5,
+                              'number': 102680,
                               'something': {
                                'inside': 10
                                 }
                              }", @"{
                                  'number': {
-                                   'left': 10,
-                                    'right': 5,
-                                     'diff': 5
+                                   'left': 102679.894,
+                                    'right': 102680.0,
+                                     'diff': 0.10599999999976717
                                     },
                                 'something': [ 
                                       20,

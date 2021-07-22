@@ -8,7 +8,7 @@ namespace c_sharp_json_diff
     abstract class DiffProcessor : IJsonProcessor<object>
     {
         private const string SkippableProperty = "_t";
-        private const string KeyDiff = "Double Diff";
+        protected string KeyDiff = "";
         private const string KeyLeft = "Left";
         private const string KeyRight = "Right";
 

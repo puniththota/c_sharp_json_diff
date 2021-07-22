@@ -35,6 +35,8 @@ namespace c_sharp_json_diff
                 dict.Add("Division", diff.Division);
             }
 
+            KeyDiff = "Double Diff";
+
             return dict;
         }
     }

@@ -66,7 +66,7 @@ namespace Test
                                      { 'b': 10 },
                                      { 'c': 20 },
                                     ]
-                                 }", 
+                                 }",
                                @"{
                                'a': {
                                     '_t': 'a',
@@ -74,14 +74,20 @@ namespace Test
                                            'b': {
                                                    'left': 15,
                                                    'right': 10,
-                                                    'diff': 5
+                                                    'Int Diff': {
+                                                      'Subtraction': 5,
+                                                      'Division': 1
+                                                      }
                                                 }
                                                 },
                                     '1': {
                                           'c': {
                                                    'left': 25,
                                                    'right': 20,
-                                                    'diff': 5
+                                                    'Int Diff': {
+                                                      'Subtraction': 5,
+                                                      'Division': 1
+                                                      }
                                                }
                                            }
                                         }
@@ -101,14 +107,20 @@ namespace Test
                                  'number': {
                                    'left': 10,
                                    'right': 5,
-                                   'diff': 5
+                                   'Int Diff': {
+                                                      'Subtraction': 5,
+                                                      'Division': 2
+                                                      }
                                   },
                                  'something': {
                                     'inside': 
                                        {
                                          'left': 20,
                                          'right': 10,
-                                         'diff': 10
+                                         'Int Diff': {
+                                                      'Subtraction': 10,
+                                                      'Division': 2
+                                                      }
                                         }   
                                        }
                                       }"},
@@ -135,8 +147,11 @@ namespace Test
                              }", @"{
                                  'number': {
                                    'left': 102679.894,
-                                    'right': 102680.0,
-                                     'diff': 0.10599999999976717
+                                    'right': 102680,
+                                     'Double Diff': {
+                                                      'Subtraction': -0.10599999999976717,
+                                                      'Division': 0.9999989676665368
+                                                      }
                                     },
                                 'something': [ 
                                       20,

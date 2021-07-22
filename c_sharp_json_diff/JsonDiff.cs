@@ -9,22 +9,16 @@ namespace c_sharp_json_diff
 {
     public class JsonDiff
     {
-        private bool _isAbsoluteDiff;
         private bool _isDiffIndented;
-        private const string skippableProperty = "_t";
-        private const string propertyLeft = "left";
-        private const string propertyRight = "right";
-        private const string propertyDiff = "diff";
+        private List<IJsonProcessor<object>> Processors = new List<IJsonProcessor<object>>();
 
-        public JsonDiff(bool isAbsoluteDiff, bool isDiffIndented)
+        public JsonDiff(bool isDiffIndented)
         {
-            _isAbsoluteDiff = isAbsoluteDiff;
             _isDiffIndented = isDiffIndented;
         }
 
         public JsonDiff()
         {
-            _isAbsoluteDiff = true;
             _isDiffIndented = true;
         }
 
@@ -34,7 +28,7 @@ namespace c_sharp_json_diff
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns name="diffReturnObject">Returns a numeric diff object of type JObject</returns>
-        public JObject NumericDiff(string left, string right)
+        public JObject NumericDoubleDiff(string left, string right)
         {
             string diff = "";
             try
@@ -45,10 +39,7 @@ namespace c_sharp_json_diff
                     return JObject.Parse(@"{}");
                 }
                 JObject diffJsonObject = JObject.Parse(diff);
-                Dictionary<string, IJsonProcessor<object>> processors = new Dictionary<string, IJsonProcessor<object>>();
-                processors.Add("Int Diff", new IntDiffProcessor());
-                processors.Add("Double Diff", new DoubleDiffProcessor());
-                InjectProcessors(processors, diffJsonObject);
+                new DoubleDiffProcessor().Process(diffJsonObject);
                 return diffJsonObject;
             }
             catch (Exception e)
@@ -63,9 +54,9 @@ namespace c_sharp_json_diff
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns>Returns a numeric diff string between left and right</returns>
-        public string NumericDiffAsString(string left, string right)
+        public string NumericDoubleDiffAsString(string left, string right)
         {
-            JObject diff = NumericDiff(left, right);
+            JObject diff = NumericDoubleDiff(left, right);
             return _isDiffIndented ? diff.ToString(Formatting.Indented) : diff.ToString();
 
         }
@@ -75,11 +66,11 @@ namespace c_sharp_json_diff
             return new JsonDiffPatch(new Options { ArrayDiff = ArrayDiffMode.Efficient }).Diff(left, right);
         }
 
-        private void InjectProcessors(Dictionary<string, IJsonProcessor<object>> processors, JObject jObject)
+        private void InjectProcessors(List<IJsonProcessor<object>> processors, JObject jObject)
         {
-            foreach(KeyValuePair<string, IJsonProcessor<object>> keyValuePair in processors)
+            foreach(IJsonProcessor<object> processor in processors)
             {
-                keyValuePair.Value.Process(keyValuePair.Key, jObject);
+                processor.Process(jObject);
             }
         }
     }

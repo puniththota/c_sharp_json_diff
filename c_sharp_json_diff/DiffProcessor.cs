@@ -8,10 +8,11 @@ namespace c_sharp_json_diff
     abstract class DiffProcessor : IJsonProcessor<object>
     {
         private const string SkippableProperty = "_t";
-        private const string propertyLeft = "left";
-        private const string propertyRight = "right";
+        private const string KeyDiff = "Double Diff";
+        private const string KeyLeft = "Left";
+        private const string KeyRight = "Right";
 
-        public void Process(string key, JObject jObject)
+        public void Process(JObject jObject)
         {
             foreach (KeyValuePair<string, JToken?> keyValuePair in jObject)
             {
@@ -32,7 +33,7 @@ namespace c_sharp_json_diff
                                 Dictionary<object, object> dict = new Dictionary<object, object>();
                                 if (newJsonObj != null && newJsonObj.Count != 0) 
                                 {
-                                    dict = CreateDictionary(key, valuesAsArray[0], valuesAsArray[1], newJsonObj);
+                                    dict = CreateDictionary(KeyDiff, valuesAsArray[0], valuesAsArray[1], newJsonObj);
                                     keyValuePair.Value.Replace(JToken.FromObject(dict));
                                 }
                             }
@@ -42,7 +43,7 @@ namespace c_sharp_json_diff
                     {
                         if(keyValuePair.Value is JObject jsonObj)
                         {
-                            Process(key, jsonObj);
+                            Process(jsonObj);
                         }
                     }
                 }
@@ -54,8 +55,8 @@ namespace c_sharp_json_diff
         private Dictionary<object, object> CreateDictionary(string diffKey, object left, object right, object diff)
         {
             Dictionary<object, object> map = new Dictionary<object, object>();
-            map.Add(propertyLeft, left);
-            map.Add(propertyRight, right);
+            map.Add(KeyLeft, left);
+            map.Add(KeyRight, right);
             map.Add(diffKey, diff);
             return map;
         }

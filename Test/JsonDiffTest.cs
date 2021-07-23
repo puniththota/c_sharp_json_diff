@@ -18,7 +18,7 @@ namespace Test
         public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedNumberOfChildrenReturned(string left, string right, string expected)
         {
             JsonDiff jsonDiff = new JsonDiff();
-            JObject actualNumericDiff = jsonDiff.NumericDiff(left, right);
+            JObject actualNumericDiff = jsonDiff.NumericDoubleDiff(left, right);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             Assert.AreEqual(expectedNumericDiff.Count, actualNumericDiff.Count);
@@ -29,7 +29,7 @@ namespace Test
         public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedNumberOfPropertiesReturned(string left, string right, string expected)
         {
             JsonDiff jsonDiff = new JsonDiff();
-            JObject actualNumericDiff = jsonDiff.NumericDiff(left, right);
+            JObject actualNumericDiff = jsonDiff.NumericDoubleDiff(left, right);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             IEnumerable<JProperty> actualProperties = actualNumericDiff.Properties();
@@ -44,7 +44,7 @@ namespace Test
         public void Given_TwoJsonStrings_When_NumericDiff_Then_ExpectedValueReturned(string left, string right, string expected)
         {
             JsonDiff jsonDiff = new JsonDiff();
-            JObject actualNumericDiff = jsonDiff.NumericDiff(left, right);
+            JObject actualNumericDiff = jsonDiff.NumericDoubleDiff(left, right);
             JObject expectedNumericDiff = JObject.Parse(expected);
 
             Assert.IsTrue(JObject.DeepEquals(expectedNumericDiff, actualNumericDiff));
@@ -56,59 +56,71 @@ namespace Test
             return new List<object[]>()
             {
                 new object[] { @"{
-                              'a': [
+                              'x': [
                                     { 'b': 15 },
-                                    { 'c': 25 },
+                                    { 'c': 20 },
                                    ]
                                   }",
                                @"{
-                               'a': [
+                               'x': [
                                      { 'b': 10 },
-                                     { 'c': 20 },
+                                     { 'c': 25 },
                                     ]
-                                 }", 
+                                 }",
                                @"{
-                               'a': {
+                               'x': {
                                     '_t': 'a',
                                      '0': {
                                            'b': {
-                                                   'left': 15,
-                                                   'right': 10,
-                                                    'diff': 5
+                                                   'Left': 15,
+                                                   'Right': 10,
+                                                    'Double Diff': {
+                                                      'Subtraction': -5.0,
+                                                      'Division': 0.66666666666666663
+                                                      }
                                                 }
                                                 },
                                     '1': {
                                           'c': {
-                                                   'left': 25,
-                                                   'right': 20,
-                                                    'diff': 5
+                                                   'Left': 20,
+                                                   'Right': 25,
+                                                    'Double Diff': {
+                                                      'Subtraction': 5.0,
+                                                      'Division': 1.25
+                                                      }
                                                }
                                            }
                                         }
                                        }" },
                 new object[]
                 { @"{
-                              'number': 10,
+                              'number': 5,
                               'something': {
                                'inside': 20
                                 }
                              }", @"{
-                              'number': 5,
+                              'number': 10,
                               'something': {
                                'inside': 10
                                 }
                              }", @"{
                                  'number': {
-                                   'left': 10,
-                                   'right': 5,
-                                   'diff': 5
+                                   'Left': 5,
+                                   'Right': 10,
+                                   'Double Diff': {
+                                                      'Subtraction': 5.0,
+                                                      'Division': 2.0
+                                                      }
                                   },
                                  'something': {
                                     'inside': 
                                        {
-                                         'left': 20,
-                                         'right': 10,
-                                         'diff': 10
+                                         'Left': 20,
+                                         'Right': 10,
+                                         'Double Diff': {
+                                                      'Subtraction': -10.0,
+                                                      'Division': 0.5
+                                                      }
                                         }   
                                        }
                                       }"},
@@ -134,9 +146,12 @@ namespace Test
                                 }
                              }", @"{
                                  'number': {
-                                   'left': 102679.894,
-                                    'right': 102680.0,
-                                     'diff': 0.10599999999976717
+                                   'Left': 102679.894,
+                                    'Right': 102680,
+                                     'Double Diff': {
+                                                      'Subtraction': 0.10599999999976717,
+                                                      'Division': 1.000001032334529
+                                                      }
                                     },
                                 'something': [ 
                                       20,
